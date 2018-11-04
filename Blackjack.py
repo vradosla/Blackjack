@@ -9,6 +9,7 @@ values = {'Two':2, 'Three':3, 'Four':4, 'Five':5, 'Six':6, 'Seven':7, 'Eight':8,
 playing = True
 import random
 from IPython.display import clear_output
+from os import system
 
 ## Create Classes: 
 
@@ -58,6 +59,7 @@ class Hand:
             pass
         if self.value > 21:
             self.value -= (self.aces*10)
+            self.aces = 0
         else:
             pass
     
@@ -97,9 +99,9 @@ def take_bet():
     '''
     Gives result bet size. Needs player_chips & dealer_chips
     '''
-    print(player_chips.total)
-    print(dealer_chips.total)
-    bet_size =""
+    print(f"Player's chips {player_chips.total}")
+    print(f"Dealer's chips {dealer_chips.total}")
+
     while True:
         try:
             bet_size = int(input("Please select your bet size: "))
@@ -107,7 +109,7 @@ def take_bet():
             print("Please select a number!")
             continue            
         else:
-            if (bet_size < player_chips.total) and (bet_size < dealer_chips.total):
+            if (bet_size <= player_chips.total) and (bet_size <= dealer_chips.total):
                 return bet_size
             else:
                 print("Insufficient chips! Please select a smaller bet!")
@@ -120,6 +122,8 @@ def show_some():
     Shows the dealer's one card
     '''
     clear_output()
+    system('sleep 1')
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     print("Dealer:")
     print(dealer_hand.cards[0])
     print("and one face-down card")
@@ -133,6 +137,8 @@ def show_all():
     Shows all cards
     '''
     clear_output()
+    system('sleep 1')
+    print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     print(f"Dealer:{dealer_hand}")
     print("\n")
     print(f"Player:{player_hand}")
@@ -147,7 +153,7 @@ def player_hit_or_stand():
         print("Blackjack!!!")
         return player_hand.value
     else:
-        while player_hand.value < 22:
+        while player_hand.value < 21:
             player_decision = input("Do you want to hit or stand? Type 'h' or 's' ").lower()
             if player_decision == "h":
                 player_hand.add_card()
@@ -158,8 +164,11 @@ def player_hit_or_stand():
             else:    
                 print("Invalid input. Try again!")
         else:
-            show_some()
-            return "player busted"
+            if player_hand.value == 21:
+                return player_hand.value
+            else:
+                show_some()
+                return "player busted"
 
 def dealer_hit_or_stand():
     '''
@@ -167,7 +176,9 @@ def dealer_hit_or_stand():
     '''
     show_all()
     while dealer_hand.value <22:
-        if dealer_hand.value > player_hand.value:
+        if player_hand.value >21:
+            return dealer_hand.value
+        elif dealer_hand.value > player_hand.value:
             return dealer_hand.value
         elif dealer_hand.value <17:
             dealer_hand.add_card()
@@ -236,17 +247,32 @@ if __name__ == "__main__":
 
                     game_result(take_bet(),player_hit_or_stand(),dealer_hit_or_stand())
 
+                    if player_chips.total >0 and dealer_chips.total >0:
+                        cont_play = input("Do you want to keep playing? Type 'y' or 'n' ").lower()
+                        try:
+                            while True:
+                                if cont_play == "n":
+                                    playing = False
+                                    raise StopIteration
+                                elif cont_play == "y":
+                                    cont_play = ""
+                                    break
+                                else:
+                                    print("Wrong input!")
+                                    cont_play = input("Do you want to keep playing? Type 'y' or 'n' ").lower()
+                        except StopIteration: break
+                    else:
+                        pass
                 else:
                     if player_chips.total == 0:
                         print("You lose!")
                         start =""
-                        break
                     elif dealer_chips.total == 0:
                         print("You win!")
                         start =""
-                        break
             else:
                 print("Please give correct input")
                 start = input("Do you want to play? Type 'y' or 'n' ").lower()
         else:
-            return "Thanks for playing!"    
+            print("Thanks for playing!")
+            playing = False    
